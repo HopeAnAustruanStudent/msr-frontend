@@ -7,6 +7,10 @@ interface MetricsDisplayProps {
 }
 
 export function MetricsDisplay({ result }: MetricsDisplayProps) {
+  if (!result.metrics) {
+    return null
+  }
+
   const metrics = [
     { label: 'Precision@k', value: result.metrics.precision_at_k },
     { label: 'Recall@k', value: result.metrics.recall_at_k },

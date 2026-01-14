@@ -98,14 +98,16 @@ export function generateMockResults(
     retrievedTracks = [...otherTracks]
       .sort(() => Math.random() - 0.5)
       .slice(0, k)
+      .map(t => ({ ...t, similarity: Math.random() * 0.3 })) // Add mock similarity for consistency
   } else {
     // For other algorithms: prefer same genres (simulate similarity)
-    const queryGenres = new Set(queryTrack.genres)
+    const queryGenres = new Set(queryTrack.genres || [])
     
     const scored = otherTracks.map((track) => {
-      const commonGenres = track.genres.filter((g) => queryGenres.has(g)).length
-      const score = commonGenres / Math.max(queryGenres.size, track.genres.length)
-      return { track, score }
+      const trackGenres = track.genres || []
+      const commonGenres = trackGenres.filter((g) => queryGenres.has(g)).length
+      const score = 0.5 + (commonGenres / Math.max(queryGenres.size, trackGenres.length)) * 0.5
+      return { track: { ...track, similarity: score }, score }
     })
     
     scored.sort((a, b) => b.score - a.score)
@@ -113,22 +115,23 @@ export function generateMockResults(
   }
 
   // Calculate mock metrics
+  const queryTrackGenres = queryTrack.genres || []
   const relevantCount = retrievedTracks.filter((t) =>
-    t.genres.some((g) => queryTrack.genres.includes(g))
+    (t.genres || []).some((g) => queryTrackGenres.includes(g))
   ).length
 
   const precision = relevantCount / k
-  const recall = relevantCount / Math.max(queryTrack.genres.length, 1)
+  const recall = relevantCount / Math.max(queryTrackGenres.length, 1)
   const mrr = retrievedTracks.findIndex((t) =>
-    t.genres.some((g) => queryTrack.genres.includes(g))
+    (t.genres || []).some((g) => queryTrackGenres.includes(g))
   ) >= 0
     ? 1 / (retrievedTracks.findIndex((t) =>
-        t.genres.some((g) => queryTrack.genres.includes(g))
+        (t.genres || []).some((g) => queryTrackGenres.includes(g))
       ) + 1)
     : 0
 
   return {
-    query_track: queryTrack,
+    query_track: undefined, // Remove query_track for consistency with backend results
     retrieved_tracks: retrievedTracks,
     algorithm,
     metrics: {
@@ -137,7 +140,7 @@ export function generateMockResults(
       mrr_at_k: mrr,
       ndcg_at_k: 0.5 + Math.random() * 0.4, // Mock NDCG
       coverage_at_k: k / MOCK_TRACKS.length,
-      pop_at_k: retrievedTracks.reduce((sum, t) => sum + t.popularity, 0) / k,
+      pop_at_k: retrievedTracks.reduce((sum, t) => sum + (t.popularity || 0), 0) / k,
     },
     k,
   }

@@ -36,7 +36,7 @@ export function ResultCard({ track, isQuery }: ResultCardProps) {
         <p className="text-gray-500 text-sm truncate">{track.album}</p>
 
         <div className="mt-3 flex flex-wrap gap-2">
-          {track.genres.map((genre) => (
+          {track.genres?.map((genre) => (
             <span
               key={genre}
               className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full"
@@ -47,9 +47,18 @@ export function ResultCard({ track, isQuery }: ResultCardProps) {
         </div>
 
         <div className="mt-3 flex items-center justify-between">
-          <span className="text-sm text-gray-600">
-            Popularity: <span className="font-semibold">{track.popularity}</span>
-          </span>
+          <div className="flex flex-col">
+            {track.popularity !== undefined && (
+              <span className="text-sm text-gray-600">
+                Popularity: <span className="font-semibold">{track.popularity}</span>
+              </span>
+            )}
+            {track.similarity !== undefined && (
+              <span className="text-sm text-blue-600">
+                Similarity: <span className="font-semibold">{(track.similarity * 100).toFixed(1)}%</span>
+              </span>
+            )}
+          </div>
           <a
             href={track.youtube_url}
             target="_blank"

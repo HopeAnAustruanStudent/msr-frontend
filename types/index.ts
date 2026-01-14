@@ -12,16 +12,17 @@ export interface Track {
   artist: string
   track: string
   album: string
-  genres: string[]
-  popularity: number
+  genres?: string[]
+  popularity?: number
   youtube_url: string
+  similarity?: number
 }
 
 export interface SearchResult {
-  query_track: Track
+  query_track?: Track
   retrieved_tracks: Track[]
   algorithm: RetrievalAlgorithm
-  metrics: {
+  metrics?: {
     precision_at_k: number
     recall_at_k: number
     mrr_at_k: number
